@@ -7,26 +7,28 @@
 
 int main() {
     // Open file for reading
-    FILE *file = fopen("test2.txt", "r");
+    FILE *file = fopen("test.txt", "rb");
     if (file == NULL) {
-        printf("Error: Could not open file\n");
-        exit(1);
+        fprintf(stderr, "Error: Could not open file\n");
+        return EXIT_FAILURE;
     }
-    
+
     // Perform lexical analysis
     Token *tokens = lexer(file);
+    fclose(file);  // Close the file immediately after tokenization
     if (tokens == NULL) {
-        printf("Error: Could not generate tokens\n");
-        exit(1);
+        fprintf(stderr, "Error: Could not generate tokens\n");
+        return EXIT_FAILURE;
     }
 
     printf("Tokens:\n");
     
-    // Print all tokens, including END_OF_TOKENS
-    for (int i = 0; ; i++) {
+    for (int i = 0;; i++)
+    {
         print_token(tokens[i]);
-        if (tokens[i].type == END_OF_TOKENS) {
-            break;  // Exit after printing the END_OF_TOKENS marker
+        if (tokens[i].type == END_OF_TOKENS)
+        {
+            break; // Exit after printing the END_OF_TOKENS marker
         }
     }
 
@@ -34,32 +36,29 @@ int main() {
     Node *ast = parser(tokens);
     if (ast == NULL) {
         free(tokens);
-        fclose(file);
-        printf("Error: Could not generate AST\n");
-        exit(1);
+        fprintf(stderr, "Error: Could not generate AST\n");
+        return EXIT_FAILURE;
     }
 
     printf("\nAST:\n");
     print_tree(ast, 0, "root");
-    
+
     // Generate code from the AST
-    char *generated_code = generate_code(ast);
-    if (generated_code == NULL) {
+    char *output_file = "output.asm";
+    int generated_code = generate_code(ast, output_file);
+    if (generated_code != 0) {
+        fprintf(stderr, "Error: Code generation failed\n");
         free_tree(ast);
         free(tokens);
-        fclose(file);
-        printf("Error: Code generation failed\n");
-        exit(1);
+        return EXIT_FAILURE;
     }
 
     printf("\nGenerated Code:\n");
-    printf("%s\n", generated_code);  // Print the generated code
+    printf("Code successfully generated: %s\n", output_file);
 
     // Clean up resources
-    free(generated_code);  // Assuming generated_code was dynamically allocated
     free_tree(ast);
     free(tokens);
-    fclose(file);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
