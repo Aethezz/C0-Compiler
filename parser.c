@@ -277,16 +277,6 @@ Node *parse_if_statement(Token **current_token_ptr)
     if_node->child2 = parse_statement(current_token_ptr);
   }
 
-  // Optional: Check for ELSE
-  // if (peek_token_type(current_token_ptr) == KEYWORD && strcmp((**current_token_ptr).value, "ELSE") == 0) {
-  //     consume_token(current_token_ptr, KEYWORD, "ELSE");
-  //     if (peek_token_type(current_token_ptr) == SEPARATOR && strcmp((**current_token_ptr).value, "{") == 0) {
-  //         if_node->child3 = parse_block(current_token_ptr);
-  //     } else {
-  //         if_node->child3 = parse_statement(current_token_ptr);
-  //     }
-  // }
-
   return if_node;
 }
 
@@ -446,77 +436,3 @@ Node *parser(Token *tokens)
 
   return root;
 }
-
-// --- Example Usage (requires lexer.h and a lexer implementation) ---
-
-/*
-// Dummy lexer.h content for compilation testing:
-#ifndef LEXER_H
-#define LEXER_H
-
-#include <stddef.h> // For size_t
-
-typedef enum {
-    KEYWORD, IDENTIFIER, INT, STRING, OPERATOR, SEPARATOR, COMP, // Added COMP
-    BEGINNING, // Maybe not needed if parser creates root
-    END_OF_TOKENS
-} TokenType;
-
-typedef struct {
-    TokenType type;
-    char *value;
-    size_t line_num;
-} Token;
-
-// Assume a function exists to get tokens:
-// Token* lexer_run(const char* source_code, int* token_count);
-
-#endif // LEXER_H
-
-
-int main() {
-    // Example: Replace with actual lexer call
-    Token tokens[] = {
-        {KEYWORD, "INT", 1},
-        {IDENTIFIER, "a", 1},
-        {OPERATOR, "=", 1},
-        {INT, "10", 1},
-        {SEPARATOR, ";", 1},
-        {KEYWORD, "IF", 2},
-        {SEPARATOR, "(", 2},
-        {IDENTIFIER, "a", 2},
-        {COMP, "==", 2}, // Example comparison token
-        {INT, "10", 2},
-        {SEPARATOR, ")", 2},
-        {SEPARATOR, "{", 2},
-        {KEYWORD, "WRITE", 3},
-        {SEPARATOR, "(", 3},
-        {STRING, "A is ten", 3},
-        {SEPARATOR, ",", 3},
-        {INT, "8", 3}, // Length for example
-        {SEPARATOR, ")", 3},
-        {SEPARATOR, ";", 3},
-        {KEYWORD, "EXIT", 4},
-        {SEPARATOR, "(", 4},
-        {INT, "0", 4},
-        {SEPARATOR, ")", 4},
-        {SEPARATOR, ";", 4},
-        {SEPARATOR, "}", 2},
-        {END_OF_TOKENS, "", 5} // Sentinel
-    };
-
-    printf("Starting Parser...\n");
-    Node *ast_root = parser(tokens);
-
-    printf("\n--- Abstract Syntax Tree ---\n");
-    print_tree(ast_root, 0, "Root");
-    printf("--------------------------\n");
-
-    free_tree(ast_root);
-    printf("Parser finished and tree freed.\n");
-
-    // Note: In a real scenario, free the token values allocated by the lexer too.
-
-    return 0;
-}
-*/

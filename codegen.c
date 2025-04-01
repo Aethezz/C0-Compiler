@@ -3,11 +3,9 @@
 #include <string.h>
 #include <assert.h>
 
-// Assume these headers define Node structure and TokenTypes correctly
 #include "lexer.h"
 #include "parser.h"
-// Assuming hashmap stores void* and requires explicit casting
-#include "./hashmap/hashmap.h" // Make sure this hashmap works with string keys
+#include "./hashmap/hashmap.h" 
 
 #define INITIAL_HASHMAP_SIZE 100
 #define FRAME_POINTER "s0" // Use s0 as frame pointer (fp alias often used)
@@ -24,7 +22,6 @@ void generate_label(char *buffer, size_t len) {
     snprintf(buffer, len, "L%d", label_count++);
 }
 
-// *** NOTE: emit_push/emit_pop are now less frequently used ***
 // Push a register onto the runtime stack (RV32)
 void emit_push(const char *reg, FILE *file) {
     fprintf(file, "  addi sp, sp, -%d\n", WORD_SIZE);
@@ -41,10 +38,8 @@ void emit_pop(const char *reg, FILE *file) {
 // *** Changed generate_expression to return the register holding the result ***
 // *** (or indicate value is immediate, though not fully implemented here) ***
 // *** For now, it still primarily uses a0, but avoids stack for simple cases ***
-void generate_expression(Node *node, FILE *file); // Still leaves result in a0 for simplicity now
+void generate_expression(Node *node, FILE *file); 
 void generate_statement(Node *node, FILE *file);
-
-// --- Core Code Generation Logic ---
 
 // Generate code for an expression (leaves result primarily in a0)
 // Tries to use immediate instructions where possible.
@@ -70,7 +65,6 @@ void generate_expression(Node *node, FILE *file) {
 
         case OPERATOR:
         case COMP: { // Handle arithmetic and comparison operators
-            // Optimization: Check if right operand is an immediate integer
             if (node->child2->type == INT) {
                 // Evaluate left operand into a0
                 generate_expression(node->child1, file);
@@ -153,7 +147,6 @@ void generate_expression(Node *node, FILE *file) {
     }
 }
 
-
 // Generate code for a statement or block
 void generate_statement(Node *node, FILE *file) {
     if (!node) return;
@@ -161,7 +154,6 @@ void generate_statement(Node *node, FILE *file) {
     char label1[20], label2[20]; // Buffers for label names
 
     if (node->type == BEGINNING && strcmp(node->value, "PROGRAM") == 0) {
-         // Should be handled by caller now, but good to double check
          generate_statement(node->child1, file);
          return;
     }
@@ -203,7 +195,6 @@ void generate_statement(Node *node, FILE *file) {
 
                  fprintf(file, "  # IF Statement\n");
 
-                 // *** Optimization: Direct comparison/branch ***
                  Node* condition = node->child1;
                  if (condition->type == COMP) {
                       // Evaluate left operand of comparison -> a0
@@ -266,7 +257,6 @@ void generate_statement(Node *node, FILE *file) {
                 fprintf(file, "  # WHILE Loop\n");
                 fprintf(file, "%s:\n", label1); // Loop start label
 
-                 // *** Optimization: Direct comparison/branch ***
                  Node* condition = node->child1;
                  if (condition->type == COMP) {
                       // Evaluate left operand of comparison -> a0
@@ -430,15 +420,7 @@ int generate_code(Node *root, const char *filename) {
 
   // --- Cleanup ---
   fclose(file);
-
-  // *** ADD HASHMAP VALUE CLEANUP HERE ***
-  // Iterate through variable_map and free allocated int* offsets
-  // (Implementation depends on your hashmap library)
-  /* Example concept:
-  ... hashmap iteration ...
-      free(value); // Where value is the int* offset
-  ... end iteration ...
-  */
+  
   hashmap_destroy(&variable_map);
 
   printf("RISC-V 32-bit code generation complete (optimized): %s\n", filename);
